@@ -4,8 +4,8 @@ import { computeBoundingBoxFromCornerPoints } from "./convert";
 import { applyScaleFactor, applyTransformation } from "./geometry";
 
 export const computeHighlights = (
-  barcodes: Pick<Barcode, "value" | "cornerPoints">[],
-  frame: Pick<Frame, "width" | "height" | "orientation">,
+  barcodes: Barcode[],
+  frame: Frame,
   layout: Size,
   resizeMode: CameraProps["resizeMode"] = "cover",
 ): Highlight[] => {
@@ -13,6 +13,7 @@ export const computeHighlights = (
 
   // If the layout is not yet known, we can't compute the highlights
   if (layout.width === 0 || layout.height === 0) {
+    console.warn(`Encountered empty layout: ${JSON.stringify(layout)}`);
     return [];
   }
 
@@ -22,7 +23,6 @@ export const computeHighlights = (
    * "landscape-left" -> "portrait"
    * "landscape-right" -> "portrait-upside-down"
    */
-  // @NOTE destructure the object to make sure we don't hold a reference to the original layout
   const adjustedLayout = ["portrait", "portrait-upside-down"].includes(
     frame.orientation,
   )
@@ -30,10 +30,7 @@ export const computeHighlights = (
         width: layout.height,
         height: layout.width,
       }
-    : {
-        width: layout.width,
-        height: layout.height,
-      };
+    : layout;
 
   const highlights = barcodes.map<Highlight>(
     ({ value, cornerPoints }, index) => {

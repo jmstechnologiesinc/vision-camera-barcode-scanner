@@ -1,5 +1,8 @@
+import {
+  VisionCameraProxy,
+  type Frame,
+} from "@jmstechnologiesinc/react-native-vision-camera";
 import { NativeEventEmitter, NativeModules, Platform } from "react-native";
-import { VisionCameraProxy, type Frame } from "react-native-vision-camera";
 import type {
   AndroidBarcode,
   Barcode,
@@ -61,25 +64,15 @@ export const scanCodes = (
   if (visionCameraProcessorPlugin == null) {
     throw new Error(`Failed to load Frame Processor Plugin "${MODULE_NAME}"!`);
   }
-
-  // console.log(`frame.width=${frame.width}, frame.height=${frame.height}`);
-  // @ts-expect-error - incrementRefCount() is not exposed in the typings
-  frame.incrementRefCount && frame.incrementRefCount();
   const nativeCodes = visionCameraProcessorPlugin.call(
     frame,
     options,
   ) as unknown as (AndroidBarcode | iOSBarcode)[];
-  // @ts-expect-error - decrementRefCount() is not exposed in the typings
-  frame.decrementRefCount && frame.decrementRefCount();
-
   if (!Array.isArray(nativeCodes)) {
-    console.log(
-      `Native frame processor ${MODULE_NAME} failed to return a proper array!`,
-      nativeCodes,
-    );
+    console.warn("Native frame processor failed to return a proper array!");
     return [];
   }
-  return nativeCodes
-    .slice()
-    .map((nativeBarcode) => normalizeNativeBarcode(nativeBarcode, frame));
+  return nativeCodes.map((nativeBarcode) =>
+    normalizeNativeBarcode(nativeBarcode, frame),
+  );
 };

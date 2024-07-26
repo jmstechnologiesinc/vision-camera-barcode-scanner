@@ -6,9 +6,8 @@ static RCTEventEmitter* eventEmitter = nil;
 
 @implementation CodeScannerProcessorPlugin
 
-- (instancetype) initWithProxy:(VisionCameraProxyHolder*)proxy
-                   withOptions:(NSDictionary* _Nullable)options {
-  self = [super initWithProxy:proxy withOptions:options];
+- (instancetype)initWithOptions:(NSDictionary*)options {
+  self = [super init];
   return self;
 }
 
@@ -28,9 +27,10 @@ static RCTEventEmitter* eventEmitter = nil;
   RCTLogInfo(@"Processing frame with width: %lu, height: %lu and arguments: %@", width, height, arguments);
 
   // Parse the barcode types to be detected
-  NSArray* barcodeTypes = arguments[@"barcodeTypes"];
+  NSDictionary* barcodeTypes = arguments[@"barcodeTypes"];
   NSMutableArray* symbologies = [NSMutableArray new];
-  for (NSString* barcodeType in barcodeTypes) {
+  for (NSString* key in barcodeTypes) {
+    NSString* barcodeType = [barcodeTypes objectForKey:key];
     VNBarcodeSymbology symbology = [self barcodeSymbologyFromString:barcodeType];
     if (symbology != nil) {
       [symbologies addObject:symbology];
@@ -231,8 +231,9 @@ static RCTEventEmitter* eventEmitter = nil;
 + (void)load {
   [FrameProcessorPluginRegistry
       addFrameProcessorPlugin:[VisionCameraCodeScanner name]
-              withInitializer:^FrameProcessorPlugin*(VisionCameraProxyHolder* _Nonnull proxy, NSDictionary* _Nullable options) {
-                return [[CodeScannerProcessorPlugin alloc] initWithProxy:proxy withOptions:options];
+              withInitializer:^FrameProcessorPlugin*(NSDictionary* options) {
+                return [[CodeScannerProcessorPlugin alloc]
+                    initWithOptions:options];
               }];
 }
 

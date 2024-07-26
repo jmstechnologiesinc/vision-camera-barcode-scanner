@@ -1,18 +1,16 @@
-import { useState } from "react";
-import { type ViewProps } from "react-native";
 import {
   runAtTargetFps,
   useFrameProcessor,
+  type Camera,
   type CameraProps,
   type Frame,
-} from "react-native-vision-camera";
+} from "@jmstechnologiesinc/react-native-vision-camera";
+import { useEffect, useRef, useState } from "react";
+import { Platform, type ViewProps } from "react-native";
 import { Worklets, useSharedValue } from "react-native-worklets-core";
-import { ScanBarcodesOptions, scanCodes } from "src/module";
+import { scanCodes, type ScanBarcodesOptions } from "src/module";
 import type { Barcode, BarcodeType, Highlight, Rect, Size } from "src/types";
-import { computeHighlights } from "..";
-import { useLatestSharedValue } from "./useLatestSharedValue";
-
-type ResizeMode = NonNullable<CameraProps["resizeMode"]>;
+import { computeHighlights } from "src/utils";
 
 export type UseBarcodeScannerOptions = {
   barcodeTypes?: BarcodeType[];
@@ -20,9 +18,8 @@ export type UseBarcodeScannerOptions = {
   fps?: number;
   onBarcodeScanned: (barcodes: Barcode[], frame: Frame) => void;
   disableHighlighting?: boolean;
-  resizeMode?: ResizeMode;
+  defaultResizeMode?: CameraProps["resizeMode"];
   scanMode?: "continuous" | "once";
-  isMountedRef?: { value: boolean };
 };
 
 export const useBarcodeScanner = ({
@@ -30,11 +27,12 @@ export const useBarcodeScanner = ({
   regionOfInterest,
   onBarcodeScanned,
   disableHighlighting,
-  resizeMode = "cover",
+  defaultResizeMode = "cover",
   scanMode = "continuous",
-  isMountedRef,
-  fps = 5,
+  fps = 2,
 }: UseBarcodeScannerOptions) => {
+  const ref = useRef<Camera>(null);
+
   // Layout of the <Camera /> component
   const layoutRef = useSharedValue<Size>({ width: 0, height: 0 });
   const onLayout: ViewProps["onLayout"] = (event) => {
@@ -42,7 +40,14 @@ export const useBarcodeScanner = ({
     layoutRef.value = { width, height };
   };
 
-  const resizeModeRef = useLatestSharedValue<ResizeMode>(resizeMode);
+  // Track resizeMode changes and pass it to the worklet
+  const resizeModeRef =
+    useSharedValue<CameraProps["resizeMode"]>(defaultResizeMode);
+  useEffect(() => {
+    resizeModeRef.value = ref.current?.props.resizeMode || defaultResizeMode;
+  }, [resizeModeRef, ref.current?.props.resizeMode, defaultResizeMode]);
+
+  //
   const isPristineRef = useSharedValue<boolean>(true);
 
   // Barcode highlights related state
@@ -51,21 +56,20 @@ export const useBarcodeScanner = ({
   // Barcode highlights related state
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const lastHighlightsCount = useSharedValue<number>(0);
-  const setHighlightsJS = Worklets.createRunOnJS(setHighlights);
+  const setHighlightsJS = Worklets.createRunInJsFn(setHighlights);
+
+  // Pixel format must be "yuv" on Android and "native" on iOS
+  const pixelFormat: CameraProps["pixelFormat"] =
+    Platform.OS === "android" ? "yuv" : "native";
 
   const frameProcessor = useFrameProcessor(
     (frame) => {
       "worklet";
-      if (isMountedRef && isMountedRef.value === false) {
-        return;
-      }
       runAtTargetFps(fps, () => {
         "worklet";
         const { value: layout } = layoutRef;
         const { value: prevBarcodes } = barcodesRef;
         const { value: resizeMode } = resizeModeRef;
-        const { width, height, orientation } = frame;
-
         // Call the native barcode scanner
         const options: ScanBarcodesOptions = {};
         if (barcodeTypes !== undefined) {
@@ -102,7 +106,7 @@ export const useBarcodeScanner = ({
           }
           const highlights = computeHighlights(
             barcodes,
-            { width, height, orientation }, // "serialized" frame
+            frame,
             layout,
             resizeMode,
           );
@@ -120,9 +124,13 @@ export const useBarcodeScanner = ({
 
   return {
     props: {
+      pixelFormat,
       frameProcessor,
       onLayout,
+      ref,
+      resizeMode: defaultResizeMode,
     },
     highlights,
+    ref,
   };
 };

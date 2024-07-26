@@ -1,4 +1,4 @@
-import type { Frame } from "react-native-vision-camera";
+import type { Frame } from "@jmstechnologiesinc/react-native-vision-camera";
 
 export type BasicParameterType = string | number | boolean | undefined;
 export type ParameterType =

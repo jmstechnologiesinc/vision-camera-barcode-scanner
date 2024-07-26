@@ -5,7 +5,7 @@ import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.uimanager.ViewManager;
-import com.mrousavy.camera.frameprocessors.FrameProcessorPluginRegistry;
+import com.mrousavy.camera.frameprocessor.FrameProcessorPluginRegistry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,15 +14,23 @@ import java.util.Map;
 
 public class VisionCameraCodeScannerPackage implements ReactPackage {
 
-  static {
+  private CodeScannerProcessorPlugin plugin;
+
+  public VisionCameraCodeScannerPackage() {
     FrameProcessorPluginRegistry.addFrameProcessorPlugin(
-        VisionCameraCodeScannerModule.NAME, CodeScannerProcessorPlugin::new);
+      VisionCameraCodeScannerModule.NAME,
+      options -> {
+        plugin = new CodeScannerProcessorPlugin(options);
+        return plugin;
+      }
+    );
   }
 
   @NonNull
   @Override
-  public List<NativeModule>
-  createNativeModules(@NonNull ReactApplicationContext reactContext) {
+  public List<NativeModule> createNativeModules(
+    @NonNull ReactApplicationContext reactContext
+  ) {
     List<NativeModule> modules = new ArrayList<>();
     modules.add(new VisionCameraCodeScannerModule(reactContext));
     return modules;
@@ -30,8 +38,9 @@ public class VisionCameraCodeScannerPackage implements ReactPackage {
 
   @NonNull
   @Override
-  public List<ViewManager>
-  createViewManagers(@NonNull ReactApplicationContext reactContext) {
+  public List<ViewManager> createViewManagers(
+    @NonNull ReactApplicationContext reactContext
+  ) {
     return Collections.emptyList();
   }
 }

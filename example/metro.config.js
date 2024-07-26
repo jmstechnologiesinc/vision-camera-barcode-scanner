@@ -20,12 +20,11 @@ const config = {
   },
 };
 
-module.exports = mergeConfig(
-  getDefaultConfig(__dirname),
-  getLinkedPackagesConfig(__dirname),
-  config,
+const linkedConfig = getLinkedPackagesConfig(__dirname);
+linkedConfig.resolver.extraNodeModules['@babel/runtime'] = resolve(
+  __dirname,
+  'node_modules/@babel/runtime',
 );
-const {blockList} = module.exports.resolver;
-module.exports.resolver.blockList = new RegExp(
-  `${blockList.source.slice(0, -2)}|\/.idea\/.*)$`,
-);
+// console.log(linkedConfig.resolver.extraNodeModules);
+// process.exit(1);
+module.exports = mergeConfig(getDefaultConfig(__dirname), linkedConfig, config);

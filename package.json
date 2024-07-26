@@ -1,15 +1,15 @@
 {
-  "name": "@mgcrea/vision-camera-barcode-scanner",
-  "version": "0.11.2",
+  "name": "@jmstechnologiesinc/vision-camera-barcode-scanner",
+  "version": "0.6.6",
   "description": "High performance barcode scanner for React Native using VisionCamera",
   "author": "Olivier Louvignes <olivier@mgcrea.io>",
-  "repository": "github:mgcrea/vision-camera-code-scanner",
+  "repository": "https://github.com/jmstechnologiesinc/vision-camera-barcode-scanner.git",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "homepage": "https://github.com/mgcrea/vision-camera-code-scanner#readme",
   "license": "MIT",
   "type": "module",
-  "publishConfig": {
-    "access": "public"
-  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -44,31 +44,32 @@
   "peerDependencies": {
     "react": "*",
     "react-native": "*",
-    "react-native-vision-camera": ">=4.0.0-0",
-    "react-native-worklets-core": ">=1.1.1-0"
+    "react-native-worklets-core": ">=0.2",
+    "@jmstechnologiesinc/react-native-vision-camera": "*"
   },
   "devDependencies": {
-    "@mgcrea/eslint-config-react-native": "^0.10.1",
-    "@react-native-community/cli-platform-android": "^13.6.5",
+    "@mgcrea/eslint-config-react-native": "^0.8.6",
     "@react-native-community/eslint-config": "^3.2.0",
-    "@react-native/gradle-plugin": "^0.74.80",
     "@testing-library/jest-native": "^5.4.3",
-    "@testing-library/react-native": "^12.4.5",
-    "@tsconfig/react-native": "^3.0.5",
-    "@types/jest": "^29.5.12",
-    "@types/react": "~18.2.79",
-    "@types/react-native": "0.72.8",
-    "eslint": "^8.57.0",
+    "@testing-library/react-native": "^12.4.0",
+    "@tsconfig/react-native": "^3.0.2",
+    "@types/jest": "^29.5.8",
+    "@types/react": "~18.2.37",
+    "@types/react-native": "0.72.6",
+    "eslint": "^8.53.0",
     "jest": "^29.7.0",
-    "prettier": "^3.2.5",
-    "prettier-plugin-java": "^2.6.0",
+    "prettier": "^3.1.0",
+    "prettier-plugin-java": "^2.4.0",
     "prettier-plugin-organize-imports": "^3.2.4",
     "react": "18.2.0",
-    "react-native": "0.73.7",
-    "react-native-vision-camera": "4.0.1",
-    "react-native-worklets-core": "1.1.1",
-    "release-it": "^17.2.0",
-    "tsup": "^8.0.2",
-    "typescript": "^5.4.5"
+    "react-native": "0.72.7",
+    "react-native-vision-camera": "3.6.15",
+    "react-native-worklets-core": "0.2.4",
+    "release-it": "^17.0.0",
+    "tsup": "^7.3.0",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@jmstechnologiesinc/react-native-vision-camera": "^3.6.15"
   }
 }
